@@ -16,12 +16,15 @@ def read_products(
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=20)] = 20,
 ) -> ProductPage:
-    products = list_products(q=q, sort=sort, order=order)
-    total = len(products)
-    start = (page - 1) * page_size
-    end = start + page_size
+    products, total = list_products(
+        q=q,
+        sort=sort,
+        order=order,
+        page=page,
+        page_size=page_size,
+    )
     return ProductPage(
-        items=products[start:end],
+        items=products,
         total=total,
         page=page,
         page_size=page_size,

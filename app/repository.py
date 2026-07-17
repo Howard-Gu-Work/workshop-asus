@@ -28,19 +28,31 @@ def list_products(
     q: str | None = None,
     sort: SortField = "id",
     order: SortOrder = "asc",
-) -> list[Product]:
+    page: int = 1,
+    page_size: int = 20,
+) -> tuple[list[Product], int]:
     products = PRODUCTS.copy()
     if q is not None:
         query = q.casefold()
         products = [
             product
             for product in products
-            if query in product.name.casefold() or query in product.category.casefold()
+            if _matches_query(product, query)
         ]
 
     reverse = order == "desc"
-    return sorted(products, key=SORT_KEYS[sort], reverse=reverse)
+    products = sorted(products, key=SORT_KEYS[sort], reverse=reverse)
+    total = len(products)
+    start = (page - 1) * page_size
+    end = start + page_size
+    return products[start:end], total
 
 
 def get_product(product_id: int) -> Product | None:
     return next((product for product in PRODUCTS if product.id == product_id), None)
+
+
+def _matches_query(product: Product, query: str) -> bool:
+    name = product.name.casefold()
+    category = product.category.casefold()
+    return query in name or query in category
