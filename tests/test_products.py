@@ -77,7 +77,8 @@ def test_list_products_rejects_invalid_query_parameters(client: TestClient) -> N
     response = client.get("/products", params={"page_size": 21})
 
     assert response.status_code == 422
-    assert "page_size" in str(response.json())
+    assert response.json()["detail"][0]["loc"] == ["query", "page_size"]
+    assert response.json()["detail"][0]["type"] == "less_than_equal"
 
 
 def test_get_product(client: TestClient) -> None:

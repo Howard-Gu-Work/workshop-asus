@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from typing import Literal
 
 from app.models import Product
@@ -13,6 +14,13 @@ PRODUCTS = [
     Product(id=5, name="ROG Ally X", category="Handheld", price=26900),
     Product(id=6, name="ProArt Display PA279CRV", category="Monitor", price=15900),
 ]
+
+SORT_KEYS: dict[SortField, Callable[[Product], int | float | str]] = {
+    "id": lambda product: product.id,
+    "name": lambda product: product.name.casefold(),
+    "category": lambda product: product.category.casefold(),
+    "price": lambda product: product.price,
+}
 
 
 def list_products(
@@ -31,13 +39,7 @@ def list_products(
         ]
 
     reverse = order == "desc"
-    if sort == "name":
-        return sorted(products, key=lambda product: product.name.casefold(), reverse=reverse)
-    if sort == "category":
-        return sorted(products, key=lambda product: product.category.casefold(), reverse=reverse)
-    if sort == "price":
-        return sorted(products, key=lambda product: product.price, reverse=reverse)
-    return sorted(products, key=lambda product: product.id, reverse=reverse)
+    return sorted(products, key=SORT_KEYS[sort], reverse=reverse)
 
 
 def get_product(product_id: int) -> Product | None:
